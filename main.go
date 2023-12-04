@@ -19,11 +19,8 @@ func main() {
 
 	routes.AuthRoutes(router)
 	routes.UserRoutes(router)
-	router.GET("/api-v1", func(c *gin.Context) {
+	router.GET("/api", func(c *gin.Context) {
 		c.JSON(200, gin.H{"success": "Hello world 1"})
-	})
-	router.GET("api-v2", func(c *gin.Context) {
-		c.JSON(200, gin.H{"success": "Hello World 2"})
 	})
 
 	router.Run(":" + port)
