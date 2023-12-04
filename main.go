@@ -3,8 +3,7 @@ package main
 import (
 	"os"
 
-	routes "Golang-auth/routes"
-
+	routes "github.com/Faanilo/Golang-auth/routes"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,4 +19,12 @@ func main() {
 
 	routes.AuthRoutes(router)
 	routes.UserRoutes(router)
+	router.GET("/api-v1", func(c *gin.Context) {
+		c.JSON(200, gin.H{"success": "Hello world 1"})
+	})
+	router.GET("api-v2", func(c *gin.Context) {
+		c.JSON(200, gin.H{"success": "Hello World 2"})
+	})
+
+	router.Run(":" + port)
 }
