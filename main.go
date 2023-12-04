@@ -17,11 +17,11 @@ func main() {
 	router := gin.New()
 	router.Use(gin.Logger())
 
+	router.GET("/api", func(c *gin.Context) {
+		c.JSON(200, gin.H{"success": "Hello world"})
+	})
 	routes.AuthRoutes(router)
 	routes.UserRoutes(router)
-	router.GET("/api", func(c *gin.Context) {
-		c.JSON(200, gin.H{"success": "Hello world 1"})
-	})
 
 	router.Run(":" + port)
 }

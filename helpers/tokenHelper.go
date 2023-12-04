@@ -28,30 +28,36 @@ var userCollection *mongo.Collection = database.OpenCollection(database.Client, 
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
 
 func GenerateAllTokens(email string, firstName string, lastName string, userType string, uid string) (signedToken string, signedRefreshToken string) {
-	claims := &RegisterDetails{
-		Email:      email,
-		First_name: firstName,
-		Last_Name:  lastName,
-		Uid:        uid,
-		User_type:  userType,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(24)).Unix(),
-		},
+	// Create claims for access token
+	accessClaims := jwt.MapClaims{
+		"email":      email,
+		"first_name": firstName,
+		"last_name":  lastName,
+		"uid":        uid,
+		"user_type":  userType,
+		"exp":        time.Now().Add(time.Hour * 24).Unix(),
 	}
-	refreshClaims := &RegisterDetails{
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(24)).Unix(),
-		},
+
+	// Create claims for refresh token
+	refreshClaims := jwt.MapClaims{
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	}
-	token, err := jwt.NewWithClaims(jwt.SigningMethodPS256, claims).SignedString([]byte(SECRET_KEY))
+
+	// Generate access token
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	token, err := accessToken.SignedString([]byte(SECRET_KEY))
 	if err != nil {
 		log.Panic(err)
 	}
-	refreshToken, errRefresh := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(SECRET_KEY))
-	if errRefresh != nil {
-		log.Panic(errRefresh)
+
+	// Generate refresh token
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	refreshTokenString, err := refreshToken.SignedString([]byte(SECRET_KEY))
+	if err != nil {
+		log.Panic(err)
 	}
-	return token, refreshToken
+
+	return token, refreshTokenString
 }
 
 func UpdateAllTokens(registerToken string, registerRefreshToken string, userId string) {
