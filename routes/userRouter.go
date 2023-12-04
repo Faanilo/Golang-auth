@@ -9,5 +9,5 @@ import (
 func UserRoutes(router *gin.Engine) {
 	router.Use(middleware.Authentificate())
 	router.GET("/get-all-users", controllers.GetUsers())
-	router.GET("/get-UserById/:userId", controllers.GetUserById())
+	router.GET("/get-userById/:user_id", controllers.GetUserById())
 }

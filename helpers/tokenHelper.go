@@ -28,7 +28,6 @@ var userCollection *mongo.Collection = database.OpenCollection(database.Client, 
 var SECRET_KEY string = os.Getenv("SECRET_KEY")
 
 func GenerateAllTokens(email string, firstName string, lastName string, userType string, uid string) (signedToken string, signedRefreshToken string) {
-	// Create claims for access token
 	accessClaims := jwt.MapClaims{
 		"email":      email,
 		"first_name": firstName,
@@ -37,19 +36,16 @@ func GenerateAllTokens(email string, firstName string, lastName string, userType
 		"user_type":  userType,
 		"exp":        time.Now().Add(time.Hour * 24).Unix(),
 	}
-
 	// Create claims for refresh token
 	refreshClaims := jwt.MapClaims{
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	}
-
 	// Generate access token
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
 	token, err := accessToken.SignedString([]byte(SECRET_KEY))
 	if err != nil {
 		log.Panic(err)
 	}
-
 	// Generate refresh token
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
 	refreshTokenString, err := refreshToken.SignedString([]byte(SECRET_KEY))
