@@ -231,3 +231,45 @@ func DeleteUser() gin.HandlerFunc {
 			"data":    user})
 	}
 }
+
+func UpdateUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userId := c.Param("user_id")
+		if err := helper.MatchUserTypeToUid(c, userId); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		defer cancel()
+
+		var updateFields bson.M
+		if err := c.BindJSON(&updateFields); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		delete(updateFields, "created_at")
+		delete(updateFields, "updated_at")
+		delete(updateFields, "_id")
+		delete(updateFields, "user_id")
+		delete(updateFields, "token")
+		delete(updateFields, "refresh_token")
+
+		filter := bson.M{"user_id": userId}
+		update := bson.M{"$set": updateFields}
+
+		updateResult, err := userCollection.UpdateOne(ctx, filter, update)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if updateResult.ModifiedCount == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"error": "No user found to update"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
+	}
+}
